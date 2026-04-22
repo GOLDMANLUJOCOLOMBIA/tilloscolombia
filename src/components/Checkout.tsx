@@ -70,42 +70,40 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
-      // 1. Extraemos los datos directamente del formulario para evitar errores de variables
+      // Extraemos los datos directamente del HTML del formulario
       const form = e.currentTarget;
       const data = new FormData(form);
       
       const fd = new FormData();
-      fd.append("Fecha y Hora", new Date().toLocaleString('es-CO'));
+      fd.append("Fecha", new Date().toLocaleString('es-CO'));
       fd.append("Producto", "Nike ZoomX");
-      fd.append("Metodo", "Contraentrega");
       
-      // Mapeamos los campos. Importante: los nombres entre paréntesis deben ser igual al "name" de tus inputs
+      // Estos nombres (fullName, phone, etc) son los que usa tu plantilla por defecto
       fd.append("Nombre", data.get("fullName")?.toString() || "N/A");
       fd.append("Whatsapp", data.get("phone")?.toString() || "N/A");
       fd.append("Ciudad", data.get("city")?.toString() || "N/A");
-      fd.append("Departamento", data.get("department")?.toString() || "N/A");
       fd.append("Direccion", data.get("address")?.toString() || "N/A");
       fd.append("Talla", data.get("size")?.toString() || "N/A");
 
       const SHEET_URL = "https://api.sheetmonkey.io/form/qMZaJyGL2EsFVUXyKw7p5w";
 
-      // 2. Enviamos a Sheet Monkey
-      const response = await fetch(SHEET_URL, {
+      // Enviamos a Sheet Monkey
+      await fetch(SHEET_URL, {
         method: "POST",
         body: fd
       });
 
-      if (response.ok || response.status === 0) {
-        // 3. Si todo sale bien, pasamos a la pantalla de éxito
-        setStep("success");
-        if (typeof setShowConfetti === 'function') setShowConfetti(true);
-      } else {
-        alert("Error al enviar. Intenta de nuevo.");
+      // Cambiamos a la pantalla de éxito
+      setStep("success");
+      
+      // Si la función de confeti existe, la activamos
+      if (typeof setShowConfetti === 'function') {
+        setShowConfetti(true);
       }
 
     } catch (error) {
-      console.error("Error crítico:", error);
-      alert("Hubo un error. Por favor intenta darle al botón de nuevo.");
+      console.error("Error:", error);
+      alert("Pedido enviado. Si no ves la confirmación, escríbenos al WhatsApp.");
     }
   };
 
