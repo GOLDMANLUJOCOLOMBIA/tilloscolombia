@@ -66,33 +66,46 @@ export default function Checkout({ open, onClose, product }: Props) {
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
-    setSubmitting(true);
-    try {
-      const fd = new FormData();
-      // Headers exactos del Google Sheet
-      fd.append("Fecha y Hora", "x-sheetmonkey-current-date-time");
-      fd.append("Producto", `${product.name} - Color ${color.toUpperCase()}`);
-      fd.append("Metodo de pago", pago === "contraentrega" ? "Pago contra entrega" : "Pago en línea");
-      fd.append("ESTADO", "NUEVO");
-      fd.append("Nombre", nombre.trim());
-      fd.append("Whatsapp", whatsapp.trim());
-      fd.append("Ciudad", ciudad.trim());
-      fd.append("Departamento", departamento);
-      fd.append("Direccion", direccion.trim());
-      fd.append("Info_Adicional", `${info.trim()} | Total: ${formatCOP(total)}`);
-      fd.append("Cantidad", String(qty));
-      fd.append("TALLA", String(size));
+    setIsSubmitting(true);
 
-      await fetch(SHEET_URL, { method: "POST", body: fd, mode: "no-cors" });
+    const fd = new FormData();
+    fd.append("Fecha y Hora", new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
+    fd.append("Producto", PRODUCT.name);
+    fd.append("Metodo de pago", "Contraentrega");
+    fd.append("ESTADO", "Pendiente");
+    fd.append("Nombre", formData.fullName);
+    fd.append("Whatsapp", formData.phone);
+    fd.append("Ciudad", formData.city);
+    fd.append("Departamento", formData.department);
+    fd.append("Direccion", formData.address);
+    fd.append("Info_Adicional", formData.additionalInfo || "N/A");
+    fd.append("Cantidad", "1");
+    fd.append("TALLA", formData.size);
+
+    try {
+      // URL de tu Sheet Monkey
+      const SHEET_URL = "https://api.sheetmonkey.io/form/qMZaJyGL2EsFVUXyKw7p5w";
+
+      await fetch(SHEET_URL, {
+        method: "POST",
+        body: fd,
+        // Eliminamos mode: "no-cors" para asegurar que Sheet Monkey reciba los datos
+      });
+
+      // Mantenemos tu lógica de éxito (confeti y mensaje)
+      setShowConfetti(true);
       setStep("success");
-    } catch (err) {
-      // Even on network noise, show success since no-cors doesn't return readable response
-      setStep("success");
+      
+      // Feedback visual para el usuario
+      console.log("Pedido enviado con éxito a Sheet Monkey");
+
+    } catch (error) {
+      console.error("Error al enviar el pedido:", error);
+      alert("Hubo un error al procesar tu pedido. Por favor, intenta de nuevo o contáctanos por WhatsApp.");
     } finally {
-      setSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
