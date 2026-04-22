@@ -66,29 +66,48 @@ export default function Checkout({ open, onClose, product }: Props) {
     return Object.keys(e).length === 0;
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
-      // 1. Recopilamos los datos (asegurándonos de que coincidan con tus nombres de variable)
+      // 1. Extraemos los datos directamente del formulario para evitar errores de variables
+      const form = e.currentTarget;
+      const data = new FormData(form);
+      
       const fd = new FormData();
       fd.append("Fecha y Hora", new Date().toLocaleString('es-CO'));
       fd.append("Producto", "Nike ZoomX");
-      fd.append("Nombre", formData.fullName || "N/A");
-      fd.append("Whatsapp", formData.phone || "N/A");
-      fd.append("Ciudad", formData.city || "N/A");
-      fd.append("Direccion", formData.address || "N/A");
-      fd.append("Talla", formData.size || "N/A");
       fd.append("Metodo", "Contraentrega");
+      
+      // Mapeamos los campos. Importante: los nombres entre paréntesis deben ser igual al "name" de tus inputs
+      fd.append("Nombre", data.get("fullName")?.toString() || "N/A");
+      fd.append("Whatsapp", data.get("phone")?.toString() || "N/A");
+      fd.append("Ciudad", data.get("city")?.toString() || "N/A");
+      fd.append("Departamento", data.get("department")?.toString() || "N/A");
+      fd.append("Direccion", data.get("address")?.toString() || "N/A");
+      fd.append("Talla", data.get("size")?.toString() || "N/A");
 
-      // 2. Tu URL de Sheet Monkey
       const SHEET_URL = "https://api.sheetmonkey.io/form/qMZaJyGL2EsFVUXyKw7p5w";
 
-      // 3. Enviamos los datos
+      // 2. Enviamos a Sheet Monkey
       const response = await fetch(SHEET_URL, {
         method: "POST",
         body: fd
       });
+
+      if (response.ok || response.status === 0) {
+        // 3. Si todo sale bien, pasamos a la pantalla de éxito
+        setStep("success");
+        if (typeof setShowConfetti === 'function') setShowConfetti(true);
+      } else {
+        alert("Error al enviar. Intenta de nuevo.");
+      }
+
+    } catch (error) {
+      console.error("Error crítico:", error);
+      alert("Hubo un error. Por favor intenta darle al botón de nuevo.");
+    }
+  };
 
       // 4. Si el envío fue exitoso, mostramos la pantalla de éxito
       if (response.ok || response.status === 0) {
