@@ -70,40 +70,37 @@ const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const fd = new FormData();
-    fd.append("Fecha y Hora", new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' }));
-    fd.append("Producto", PRODUCT.name);
-    fd.append("Metodo de pago", "Contraentrega");
-    fd.append("ESTADO", "Pendiente");
-    fd.append("Nombre", formData.fullName);
-    fd.append("Whatsapp", formData.phone);
-    fd.append("Ciudad", formData.city);
-    fd.append("Departamento", formData.department);
-    fd.append("Direccion", formData.address);
-    fd.append("Info_Adicional", formData.additionalInfo || "N/A");
-    fd.append("Cantidad", "1");
-    fd.append("TALLA", formData.size);
-
     try {
-      // URL de tu Sheet Monkey
+      const fd = new FormData();
+      // Usamos valores directos para evitar errores si las variables fallan
+      fd.append("Fecha", new Date().toLocaleString('es-CO'));
+      fd.append("Producto", "Nike ZoomX");
+      fd.append("Nombre", formData.fullName || "Sin nombre");
+      fd.append("Whatsapp", formData.phone || "Sin celular");
+      fd.append("Ciudad", formData.city || "Sin ciudad");
+      fd.append("Direccion", formData.address || "Sin direccion");
+      fd.append("Talla", formData.size || "N/A");
+      fd.append("Metodo", "Contraentrega");
+
       const SHEET_URL = "https://api.sheetmonkey.io/form/qMZaJyGL2EsFVUXyKw7p5w";
 
-      await fetch(SHEET_URL, {
+      // El envío real
+      const response = await fetch(SHEET_URL, {
         method: "POST",
-        body: fd,
-        // Eliminamos mode: "no-cors" para asegurar que Sheet Monkey reciba los datos
+        body: fd
       });
 
-      // Mantenemos tu lógica de éxito (confeti y mensaje)
-      setShowConfetti(true);
-      setStep("success");
-      
-      // Feedback visual para el usuario
-      console.log("Pedido enviado con éxito a Sheet Monkey");
+      if (response.ok) {
+        // Esto es lo que activa el mensaje de "Pedido recibido"
+        setStep("success");
+        if (typeof setShowConfetti === 'function') setShowConfetti(true);
+      } else {
+        throw new Error("Error en la respuesta del servidor");
+      }
 
     } catch (error) {
-      console.error("Error al enviar el pedido:", error);
-      alert("Hubo un error al procesar tu pedido. Por favor, intenta de nuevo o contáctanos por WhatsApp.");
+      console.error("Error detallado:", error);
+      alert("¡Atención! No pudimos procesar el pedido. Por favor, tómale un pantallazo a tus datos y envíanoslos por WhatsApp para procesar tu compra manualmente.");
     } finally {
       setIsSubmitting(false);
     }
