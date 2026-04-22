@@ -68,41 +68,38 @@ export default function Checkout({ open, onClose, product }: Props) {
 
 const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
     try {
+      // 1. Recopilamos los datos (asegurándonos de que coincidan con tus nombres de variable)
       const fd = new FormData();
-      // Usamos valores directos para evitar errores si las variables fallan
-      fd.append("Fecha", new Date().toLocaleString('es-CO'));
+      fd.append("Fecha y Hora", new Date().toLocaleString('es-CO'));
       fd.append("Producto", "Nike ZoomX");
-      fd.append("Nombre", formData.fullName || "Sin nombre");
-      fd.append("Whatsapp", formData.phone || "Sin celular");
-      fd.append("Ciudad", formData.city || "Sin ciudad");
-      fd.append("Direccion", formData.address || "Sin direccion");
+      fd.append("Nombre", formData.fullName || "N/A");
+      fd.append("Whatsapp", formData.phone || "N/A");
+      fd.append("Ciudad", formData.city || "N/A");
+      fd.append("Direccion", formData.address || "N/A");
       fd.append("Talla", formData.size || "N/A");
       fd.append("Metodo", "Contraentrega");
 
+      // 2. Tu URL de Sheet Monkey
       const SHEET_URL = "https://api.sheetmonkey.io/form/qMZaJyGL2EsFVUXyKw7p5w";
 
-      // El envío real
+      // 3. Enviamos los datos
       const response = await fetch(SHEET_URL, {
         method: "POST",
         body: fd
       });
 
-      if (response.ok) {
-        // Esto es lo que activa el mensaje de "Pedido recibido"
-        setStep("success");
+      // 4. Si el envío fue exitoso, mostramos la pantalla de éxito
+      if (response.ok || response.status === 0) {
+        setStep("success"); 
+        // Si usas confeti y la función existe, la llamamos:
         if (typeof setShowConfetti === 'function') setShowConfetti(true);
-      } else {
-        throw new Error("Error en la respuesta del servidor");
       }
 
     } catch (error) {
-      console.error("Error detallado:", error);
-      alert("¡Atención! No pudimos procesar el pedido. Por favor, tómale un pantallazo a tus datos y envíanoslos por WhatsApp para procesar tu compra manualmente.");
-    } finally {
-      setIsSubmitting(false);
+      console.error("Error al enviar:", error);
+      alert("Hubo un pequeño problema. Por favor intenta darle al botón de nuevo.");
     }
   };
 
