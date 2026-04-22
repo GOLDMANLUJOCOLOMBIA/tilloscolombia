@@ -6,23 +6,22 @@ import Countdown from "./components/Countdown";
 const PRODUCT = {
   name: "Nike ZoomX",
   price: 129900,
-  oldPrice: 159900,
-  image: "/images/hero-1.jpg", // Reemplaza con tu imagen real
+  oldPrice: 169900,
+  image: "/1.jpg", // Esta es la foto que sale junto al botón de compra
 };
 
 /**
  * Galería tipo storytelling - imágenes verticales que coinciden al hacer scroll.
- * Coloca tus imágenes en /public/images/ con estos nombres exactos
- * (las referencias del cliente: hero, oferta, confianza, producto, lifestyle, tech, performance).
+ * Asegúrate de que tus imágenes estén directamente en la carpeta /public/
  */
 const GALLERY = [
-  "/images/hero-1.jpg",
-  "/images/oferta-2.jpg",
-  "/images/confianza-3.jpg",
-  "/images/producto-4.jpg",
-  "/images/lifestyle-5.jpg",
-  "/images/tech-6.jpg",
-  "/images/performance-7.jpg",
+  "/1.jpg",
+  "/2.jpg",
+  "/3.jpg",
+  "/4.jpg",
+  "/5.jpg",
+  "/6.jpg",
+  "/7.jpg"
 ];
 
 const formatCOP = (n: number) =>
